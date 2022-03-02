@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+        <title>Register</title>
+    </head>
+    <body>
+        {{msg}}
+        <form action="/register" method="post">
+            <input autocomplete="off" autofocus name="nombres" placeholder="Nombres" type="text" required>
+            <input autocomplete="off" name="apellidos" placeholder="Apellidos" type="text" required>
+            <input autocomplete="off" name="correo" placeholder="Correo" type="email" required>
+            <input autocomplete="off" name="clave" placeholder="Contraseña" type="password" required>
+            <input autocomplete="off" name="confClave" placeholder="Verificación contraseña" type="password" required>
+            <span>
+                <input type="radio" id="rol" name="rol" value="profesor">
+                <label for="rol">Profesor</label>
+            </span>
+            <span>
+                <input type="radio" id="rol" name="rol" value="estudiante">
+                <label for="rol">Estudiante</label>
+            </span>
+            <input type="submit">
+        </form>
+    </body>
+</html>
