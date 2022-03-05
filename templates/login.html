@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+        <title>Login</title>
+    </head>
+    <body>
+        {{msg}}
+        <form action="/login" method="post">
+            <input autocomplete="off" name="correo" placeholder="Correo" type="email" required>
+            <input autocomplete="off" name="clave" placeholder="Contraseña" type="password" required>
+            <input type="submit">
+        </form>
+    </body>
+</html>

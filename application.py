@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 from flask_session import Session
 import re
 import os
@@ -20,6 +20,66 @@ db = client.oneminute
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+@app.route("/")
+def index():
+    # Si la sesión no ha sido iniciada
+    if  not session.get("correo") or not session.get("nombre"):
+        return redirect("/login")
+    else:
+        return render_template("index.html", correo = session["correo"], nombre = session["nombre"])
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "GET":
+        # Si la sesión ya fue iniciada
+        if  session.get("correo") and session.get("nombre"):
+            return redirect("/")
+        else:
+            return render_template("login.html")
+    else:
+        # Se debe validar que se hayan ingresado los datos necesarios. En caso de que haya un error se va construyendo un mensaje de error
+        msgError = ""
+        loginData = {}
+        # con este primer if se revisa si en el formulario viene el campo email.
+        if "correo" in request.form:
+            #Luego se guarda en un diccionario, pero antes se le quitan los espacios del inicio y del final con el método strip
+            loginData["correo"] = request.form.get("correo").strip()
+        else:
+            msgError = "Debe ingresar un correo"
+        # Se repite lo mismo para el apellido
+        if "clave" in request.form:
+            loginData["clave"] = request.form.get("clave")
+        else:
+            msgError = "Debe ingresar la contraseña"
+
+        if msgError != "":
+            return render_template("login.html", msg = msgError)
+        else:
+            # Ahora debemos verificar si el usuario existe en la base de datos con la clave correspondiente
+            usuario = db.usuarios.find_one({"correo":loginData["correo"]})
+            # Si se obtuvo algún usurio que tenga el correo ingresado
+            if usuario:
+                # Se verifica si tiene el campo clave
+                if "clave" in usuario:
+                    # Luego se revisa si la clave coincide con la ingresada por el usuario
+                    if check_password_hash(usuario["clave"], loginData["clave"]):
+                        # Se guarda en la sesión el correo del usuario, eso nos permitirá ver si la sesión fue iniciada
+                        session["correo"] = loginData["correo"]
+                        if "nombres" in usuario:
+                            session["nombre"] = usuario["nombres"].split()[0]
+                        else:
+                            session["nombre"] = "Anónimo"
+                        return redirect("/")
+            # Si se llega hasta este punto es que la autenticación falló
+            msgError += "Correo o clave erradas"
+            return render_template("login.html", msg = msgError)
+
+@app.route("/logout", methods=["POST", "GET"])
+def logout():
+    session["correo"] = None
+    session["nombre"] = None
+    return redirect("/login")
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
